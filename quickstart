@@ -1,0 +1,6 @@
+# Create demand record
+python demand.py -e 300 'demand001||2018-02-01T15:15:00.000Z|5.00,5.00|2018-02-01T23:00:00.000Z|8.00,8.00|'
+
+# Create bid
+python bid.py 'bid001||demand001'
+

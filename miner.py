@@ -3,20 +3,12 @@ import csv
 import os
 from common import *
 
-
 DISTANCE_THRESHOLD = 4
 TIME_THRESHOLD = datetime.timedelta(hours=1)
 
 
 def extract_timestamp(obj):
     return obj.timestamp
-
-
-def construct_obj(row):
-    if row[0] == Demand.__name__:
-        return Demand(*row[1:])
-    else:
-        return Bid(*row[1:])
 
 
 def compute_distance(loc1, loc2):
@@ -46,10 +38,9 @@ def validate_consolidation(demand_ids, demand_map):
 def main(delete):
     demand_ids = []
     demand_map = {}
-    closed_demand_ids = []
 
     # Read history block files
-    history = [f for f in os.listdir('.') if f.startswith('output')]
+    history = [f for f in os.listdir('.') if f.startswith('block')]
     for his in history:
         fl = open(his, 'r')
         read_csv = csv.reader(fl, delimiter='|')
@@ -60,9 +51,6 @@ def main(delete):
                 demand_map[record.id] = record
                 if record.expiry < datetime.datetime.now():
                     print(f'History demand {record.id} has expired, will not be considered.')
-                    closed_demand_ids.append(record.id)
-            else:
-                closed_demand_ids.extend(record.demand_ids)
 
     # Process current block
     fl = open(INPUT_FILE, 'r')
@@ -99,22 +87,40 @@ def main(delete):
             bid_map[record.id] = record
 
     # Go through the current bids and find if any other bids contain the same demand_id
-    next_bid_map = bid_map.copy()
-    # Might need to run the consolidation multiple times, to reach stability
+    next_bid_map = {}
+    first_run = True
     consolidated = True
-    while not consolidated:
-        for k, bid in next_bid_map:
-            for demand_id in record.demand_ids:
-                # Now we need to decide the winner
-                if demand_id in bid.demand_ids:
-                    # Longest wins, otherwise earliest wins, otherwise first wins
-                    if len(bid.demand_ids) < len(record.demand_ids):
-                        next_bid_map[record.id] = record
-                        print(f'Bid {record.id} with demands {record.demand_ids} replaced {k} with demands {record.demand_ids}')
-                        consolidated = False
+    # We may need to run this consolidation process several times.  This is to solve this problem:
+    # bid1: d1
+    # bid2: d1, d2
+    # bid3: d2, d3, d4
+    # Then bid1 and bid3 should be accepted, bid2 should be rejected.
+    losers = []
+    while first_run or not consolidated:
+        consolidated = True
+        for k_const, bid_const in bid_map.items():
+            conflict = False
+            loser = None
+            for k, bid in next_bid_map.items():
+                for demand_id in bid_const.demand_ids:
+                    # Now we need to decide the winner
+                    if demand_id in bid.demand_ids:
+                        conflict = True
+                        # Longest wins, otherwise first wins
+                        if k_const not in losers and len(bid.demand_ids) < len(bid_const.demand_ids):
+                            loser = k
+                            losers.append(k)
+                        else:
+                            loser = None
+            if not conflict or loser is not None:
+                if not conflict:
+                    print(f'Bid {k_const} with demands {bid_const.demand_ids} was added')
                 else:
-                    # Bid still valid, add it
-                    next_bid_map[k] = bid
+                    print(f'Bid {k_const} with demands {bid_const.demand_ids} replaced {loser} with demands {bid_map[loser].demand_ids}')
+                next_bid_map.pop(loser, None)
+                next_bid_map[bid_const.id] = bid_const
+                consolidated = False
+        first_run = False
 
     print('Consolidated')
     bid_map = next_bid_map
@@ -125,7 +131,7 @@ def main(delete):
 
     # Write new block
     next_block_id = len(history)
-    fl = open(f'output{next_block_id}.csv', 'w+')
+    fl = open(f'block{next_block_id}.csv', 'w+')
     writer = csv.writer(fl, delimiter='|')
     for row in [r.to_csv() for r in new_records]:
         writer.writerow(row)

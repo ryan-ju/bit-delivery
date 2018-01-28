@@ -2,6 +2,15 @@ import datetime
 
 INPUT_FILE = 'input.csv'
 
+LOGO = """
+    ____  _ __     ____       ___                      
+   / __ )(_) /_   / __ \___  / (_)   _____  _______  __
+  / __  / / __/  / / / / _ \/ / / | / / _ \/ ___/ / / /
+ / /_/ / / /_   / /_/ /  __/ / /| |/ /  __/ /  / /_/ / 
+/_____/_/\__/  /_____/\___/_/_/ |___/\___/_/   \__, /  
+                                              /____/
+                                             
+"""
 
 class Demand:
     def __init__(self, id, timestamp, col_time, col_loc, del_time, del_loc, expiry):
@@ -33,6 +42,13 @@ class Bid:
 
     def to_csv(self):
         return [self.__class__.__name__, self.id, format_ts(self.timestamp), ','.join(self.demand_ids)]
+
+
+def construct_obj(row):
+    if row[0] == Demand.__name__:
+        return Demand(*row[1:])
+    else:
+        return Bid(*row[1:])
 
 
 def parse_ts(s):

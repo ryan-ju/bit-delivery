@@ -1,3 +1,6 @@
 clear:
-	rm input.csv output*
+	rm input.csv block*
+
+clear-blocks:
+	rm block*
 
