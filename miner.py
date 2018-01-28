@@ -36,6 +36,7 @@ def validate_consolidation(demand_ids, demand_map):
 @click.command()
 @click.option('--delete-workset', '-d', 'delete', is_flag=True)
 def main(delete):
+    print_marker('Mining')
     demand_ids = []
     demand_map = {}
 

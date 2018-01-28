@@ -8,6 +8,7 @@ from common import *
 @click.option('--over-timestamp', '-ot', 'override_timestamp')
 @click.option('--expiry', '-e', 'expiry')
 def main(demand_str, override_timestamp, expiry):
+    print_marker('Submit demand')
     demand_arr = demand_str.split('|')
     if override_timestamp:
         demand_arr[1] = override_timestamp

@@ -12,6 +12,7 @@ LOGO = """
                                              
 """
 
+
 class Demand:
     def __init__(self, id, timestamp, col_time, col_loc, del_time, del_loc, expiry):
         self.id = id
@@ -42,6 +43,14 @@ class Bid:
 
     def to_csv(self):
         return [self.__class__.__name__, self.id, format_ts(self.timestamp), ','.join(self.demand_ids)]
+
+
+def print_marker(s):
+    bar = '-' * (len(s) + 4)
+    print()
+    print(bar)
+    print(f'| {s} |')
+    print(bar)
 
 
 def construct_obj(row):

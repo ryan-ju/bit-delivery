@@ -13,9 +13,9 @@ def main():
         fl = open(his, 'r')
         read_csv = csv.reader(fl, delimiter='|')
         records = [construct_obj(row) for row in read_csv if len(row) > 0]
-        bar = '=' * (96 + len(his))
+        bar = '=' * (20 + len(his))
         print(bar)
-        print(f'=============================================== {his} ===============================================')
+        print(f'||        {his}        ||')
         print(bar)
         for record in records:
             print(f'{record.__class__.__name__}: {record.__dict__}')

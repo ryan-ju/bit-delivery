@@ -7,6 +7,7 @@ from common import *
 @click.argument('bid_str')
 @click.option('--over-timestamp', '-ot', 'override_timestamp')
 def main(bid_str, override_timestamp):
+    print_marker('Submit bid')
     bid_arr = bid_str.split('|')
     if override_timestamp:
         bid_arr[1] = override_timestamp
