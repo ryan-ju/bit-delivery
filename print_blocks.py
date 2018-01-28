@@ -18,7 +18,7 @@ def main():
         print(f'||        {his}        ||')
         print(bar)
         for record in records:
-            print(f'{record.__class__.__name__}: {record.__dict__}')
+            print(f'{record.__class__.__name__}: {record.to_string()}')
             print()
 
 

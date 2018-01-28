@@ -34,6 +34,9 @@ class Demand:
             format_loc(self.del_loc),
             format_ts(self.expiry)]
 
+    def to_string(self):
+        return f'id:{self.id}, delivery_time:{format_ts(self.del_time)}, delivery_location:[{format_loc(self.del_loc)}], expiry:{format_ts(self.expiry)}'
+
 
 class Bid:
     def __init__(self, id, timestamp, demand_ids):
@@ -43,6 +46,9 @@ class Bid:
 
     def to_csv(self):
         return [self.__class__.__name__, self.id, format_ts(self.timestamp), ','.join(self.demand_ids)]
+
+    def to_string(self):
+        return f'id:{self.id}, timestamp:{format_ts(self.timestamp)}, delivery_location:{self.demand_ids}'
 
 
 def print_marker(s):
